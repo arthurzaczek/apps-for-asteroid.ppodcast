@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="net.zaczek.PPodCast"
+      android:versionCode="3"
+      android:versionName="1.0.2">
+
+    <application android:icon="@drawable/home_icon" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity android:name=".ListPodcasts"
+                  android:label="PPodCast"
+                  android:icon="@drawable/overview_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="parrot.CATEGORY" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ViewPodcast"
+                  android:label="View Podcast">
+        </activity>
+        <activity android:name=".ViewShow"
+                  android:label="View Show">
+        </activity>
+        <activity android:name=".AddPodcast"
+                  android:label="Add Podcast">
+        </activity>
+    </application>
+    
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
+<uses-sdk android:minSdkVersion="3"></uses-sdk>
+</manifest> 

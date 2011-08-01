@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/RelativeLayout01" android:layout_width="wrap_content"
+  android:layout_height="wrap_content" android:padding="5sp"
+  >
+  <TextView android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_show_row_title" android:layout_width="fill_parent"
+    android:text="Show title" android:textStyle="bold" android:padding="3sp"></TextView>
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:id="@+id/list_show_row_date_label"
+    android:text="@string/list_show_row_date"
+    android:layout_below="@+id/list_show_row_title"
+    ></TextView>
+  <TextView android:layout_height="wrap_content"
+    android:id="@+id/list_show_row_date"
+    android:layout_toRightOf="@+id/list_show_row_date_label"
+    android:paddingLeft="6sp" android:text="Tuesday 28th 9pm"
+    android:layout_width="wrap_content" android:layout_below="@+id/list_show_row_title"></TextView>
+</RelativeLayout>

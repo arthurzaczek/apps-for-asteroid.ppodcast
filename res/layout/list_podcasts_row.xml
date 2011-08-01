@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/RelativeLayout01" android:layout_width="wrap_content"
+  android:layout_height="wrap_content" android:padding="5sp"
+  >
+  <TextView android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_podcasts_row_title" android:layout_width="fill_parent"
+    android:text="Show title" android:textStyle="bold"></TextView>
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:id="@+id/list_podcasts_row_latest_show_label"
+    android:text="@string/list_podcasts_row_latest_show"
+    android:layout_below="@+id/list_podcasts_row_title"
+    ></TextView>
+  <TextView android:layout_height="wrap_content"
+    android:layout_width="fill_parent" android:id="@+id/list_podcasts_row_latest_show"
+    android:layout_below="@+id/list_podcasts_row_title"
+    android:layout_toRightOf="@+id/list_podcasts_row_latest_show_label"
+    android:paddingLeft="6sp" ></TextView>
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:id="@+id/list_podcasts_row_last_checked_label"
+    android:text="@string/list_podcasts_row_last_checked"
+    android:layout_below="@+id/list_podcasts_row_latest_show_label"
+    ></TextView>
+  <TextView android:layout_height="wrap_content"
+    android:id="@+id/list_podcasts_row_last_checked"
+    android:layout_toRightOf="@+id/list_podcasts_row_last_checked_label"
+    android:paddingLeft="6sp" android:text="Tuesday 28th 9pm"
+    android:layout_below="@+id/list_podcasts_row_latest_show"
+    android:layout_width="wrap_content" ></TextView>
+</RelativeLayout>

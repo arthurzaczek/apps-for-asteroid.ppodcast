@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="introduction">Add an RSS feed!</string>
+    <string name="app_name">PPodCast</string>
+<string name="add_podcast_button">Add Podcast</string>
+<string name="list_podcasts_row_last_checked">Last Checked: </string>
+<string name="list_podcasts_row_total_shows">Total Shows: </string>
+<string name="list_podcasts_row_latest_show">Latest: </string>
+<string name="list_show_row_date">Published: </string>
+<string name="delete_podcast_text">Are you sure you want to delete this podcast?</string>
+<string name="delete_podcast_button">Delete this podcast</string>
+<string name="cancel_delete_podcast_button">Cancel</string>
+</resources>

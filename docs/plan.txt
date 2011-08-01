@@ -1,0 +1,41 @@
+Design and planning notes from my notebook:
+
+#### Basic features ####
+
+At a bare minimum the following features should be supported:
+
+* View all podcasts
+
+List all podcasts in the application. Each podcast is selectable and
+menu options allow access to download new shows for all podcasts and
+add podcast.
+
+* View podcast
+
+View a podcast and all shows for the podcast. Select a podcast to view
+it and menu option for download new shows for the podcast and delete
+podcast.
+
+* View show
+
+View a show. Allow download of the show (if not already downloaded) and
+play show for downloaded shows.
+
+* Play show
+
+Allow play/pause of show.
+
+* Add podcast
+
+Add a podcast. Shows already existing in the feed are not downloaded and
+not "new" shows. Users have to download them manually.
+
+* Delete podcast
+
+Delete the podcast, all shows and downloaded items.
+
+* Download new shows for all podcasts
+* Download new shows for podcast
+* Download show
+
+Figure it out.
