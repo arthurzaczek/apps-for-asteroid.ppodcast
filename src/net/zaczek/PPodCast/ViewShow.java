@@ -11,25 +11,31 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ViewShow extends Activity {
 
+	private WakeLock wl;
+
 	private static final int DLG_WAIT = 1;
 	private long show = -1;
 	private PuddleDbAdapter podcastDb;
 	MediaPlayer mp;
 	private AudioManager am;
-	
+
 	private TextView showTitle;
 	private TextView showDescription;
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
 
 		setContentView(R.layout.view_show);
 
@@ -43,14 +49,14 @@ public class ViewShow extends Activity {
 		showDescription = (TextView) findViewById(R.id.ViewShowDescription);
 
 		mp = new MediaPlayer();
-		am = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
 		fillData();
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		switch(keyCode) {
+		switch (keyCode) {
 		case KeyEvent.KEYCODE_DPAD_DOWN:
 			am.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
 			return true;
@@ -77,8 +83,15 @@ public class ViewShow extends Activity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		wl.acquire();
+	}
+
+	@Override
 	protected void onPause() {
 		mp.stop();
+		wl.release();
 		super.onPause();
 	}
 
@@ -92,16 +105,13 @@ public class ViewShow extends Activity {
 
 		startManagingCursor(showCursor);
 
-		String title = showCursor.getString(showCursor
-				.getColumnIndex(PuddleDbAdapter.SHOW_TITLE));
+		String title = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_TITLE));
 		showTitle.setText(title);
 
-		String description = showCursor.getString(showCursor
-				.getColumnIndex(PuddleDbAdapter.SHOW_DESCRIPTION));
+		String description = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_DESCRIPTION));
 		showDescription.setText(description);
 
-		String url = showCursor.getString(showCursor
-				.getColumnIndex(PuddleDbAdapter.SHOW_URL));
+		String url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
 		play(url);
 	}
 
