@@ -4,8 +4,9 @@
 	android:layout_height="fill_parent">
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/ViewShowTitle"
-		android:text="View Show" android:textStyle="bold" android:padding="5sp"></TextView>
+		android:text="View Show" android:textStyle="bold" android:textSize="24sp" android:padding="10sp"></TextView>
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/ViewShowDescription"
-		 android:padding="10sp"></TextView>
+		 android:textSize="20sp"
+		 android:padding="20sp"></TextView>
 </LinearLayout>

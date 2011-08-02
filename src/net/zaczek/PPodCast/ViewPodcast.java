@@ -32,6 +32,7 @@ public class ViewPodcast extends Activity {
 	private boolean waitDlgShown = false;
 
 	private long podcastId = -1;
+	private String title;
 	private PuddleDbAdapter podcastDb;
 
 	private TextView titleTextView;
@@ -73,7 +74,7 @@ public class ViewPodcast extends Activity {
 	private void fillData() {
 		Cursor c = podcastDb.fetchPodcast(podcastId);
 		try {
-			String title = c.getString(c
+			title = c.getString(c
 					.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE));
 			titleTextView.setText(title);
 		} finally {
@@ -122,6 +123,7 @@ public class ViewPodcast extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
+			titleTextView.setText("* " + title);
 		}
 
 		@Override

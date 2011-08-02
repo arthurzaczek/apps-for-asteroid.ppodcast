@@ -2,12 +2,11 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/RelativeLayout01" android:layout_width="wrap_content"
-  android:layout_height="wrap_content" android:padding="5sp"
-  >
+  android:layout_height="wrap_content" android:padding="5sp" >
   <TextView android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_show_row_title" android:layout_width="fill_parent"
-    android:text="Show title" android:textStyle="bold" android:padding="3sp"></TextView>
+    android:text="Show title" android:textStyle="bold" android:padding="3sp" android:textSize="20sp"></TextView>
   <TextView android:layout_width="wrap_content"
     android:layout_height="wrap_content" android:id="@+id/list_show_row_date_label"
     android:text="@string/list_show_row_date"
