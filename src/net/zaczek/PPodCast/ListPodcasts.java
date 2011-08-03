@@ -3,20 +3,28 @@ package net.zaczek.PPodCast;
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
 import net.zaczek.PPodCast.util.PodcastUtil;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ListPodcasts extends ListActivity {
@@ -27,6 +35,7 @@ public class ListPodcasts extends ListActivity {
 
 	private static final int SYNC_PODCAST_ID = Menu.FIRST;
 	private static final int EXIT_ID = Menu.FIRST + 1;
+	private static final int ABOUT_ID = Menu.FIRST + 2;
 
 	private PuddleDbAdapter podcastDb;
 
@@ -47,15 +56,10 @@ public class ListPodcasts extends ListActivity {
 		Cursor podcastsCursor = podcastDb.fetchAllPodcasts();
 		startManagingCursor(podcastsCursor);
 
-		String[] from = new String[] { PuddleDbAdapter.PODCAST_TITLE,
-				PuddleDbAdapter.PODCAST_LAST_CHECKED,
-				PuddleDbAdapter.PODCAST_LATEST_SHOW_TITLE };
-		int[] to = new int[] { R.id.list_podcasts_row_title,
-				R.id.list_podcasts_row_last_checked,
-				R.id.list_podcasts_row_latest_show };
+		String[] from = new String[] { PuddleDbAdapter.PODCAST_TITLE, PuddleDbAdapter.PODCAST_LAST_CHECKED, PuddleDbAdapter.PODCAST_LATEST_SHOW_TITLE };
+		int[] to = new int[] { R.id.list_podcasts_row_title, R.id.list_podcasts_row_last_checked, R.id.list_podcasts_row_latest_show };
 
-		SimpleCursorAdapter podcastsAdapter = new SimpleCursorAdapter(this,
-				R.layout.list_podcasts_row, podcastsCursor, from, to);
+		SimpleCursorAdapter podcastsAdapter = new SimpleCursorAdapter(this, R.layout.list_podcasts_row, podcastsCursor, from, to);
 		setListAdapter(podcastsAdapter);
 	}
 
@@ -72,6 +76,7 @@ public class ListPodcasts extends ListActivity {
 		super.onCreateOptionsMenu(menu);
 		Log.d(TAG, "Creating options menu");
 		menu.add(0, SYNC_PODCAST_ID, 0, "Sync");
+		menu.add(0, ABOUT_ID, 0, "About");
 		menu.add(0, EXIT_ID, 0, "Exit");
 		return true;
 	}
@@ -83,6 +88,9 @@ public class ListPodcasts extends ListActivity {
 		switch (itemId) {
 		case SYNC_PODCAST_ID:
 			syncPodcast();
+			return true;
+		case ABOUT_ID:
+			startActivity(new Intent(this, About.class));
 			return true;
 		case EXIT_ID:
 			finish();
@@ -139,15 +147,12 @@ public class ListPodcasts extends ListActivity {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		ProgressDialog dialog;
 		switch (id) {
 		case DLG_WAIT:
-			dialog = new ProgressDialog(this);
-			dialog.setMessage("Syncing Podcasts");
-			break;
-		default:
-			dialog = null;
+			ProgressDialog pDialog = new ProgressDialog(this);
+			pDialog.setMessage("Syncing Podcasts");
+			return pDialog;
 		}
-		return dialog;
+		return null;
 	}
 }
