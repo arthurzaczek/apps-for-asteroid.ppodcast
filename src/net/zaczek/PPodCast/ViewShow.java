@@ -156,7 +156,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	public void onBufferingUpdate(MediaPlayer mp, int percent) {
-		showStatusBuffer.setText(percent + "%");
+		showStatusBuffer.setText(percent + "% Buf.");
 	}
 	
 	public boolean onError(MediaPlayer mp, int what, int extra) {
