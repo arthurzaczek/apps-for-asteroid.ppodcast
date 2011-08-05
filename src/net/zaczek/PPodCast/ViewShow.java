@@ -64,7 +64,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		mp.setOnBufferingUpdateListener(this);
 		mp.setOnCompletionListener(this);
 		mp.setOnInfoListener(this);
-
+		
 		fillData();
 	}
 	
@@ -76,6 +76,14 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			return true;
 		case KeyEvent.KEYCODE_DPAD_UP:
 			am.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+			return true;
+		case KeyEvent.KEYCODE_DPAD_RIGHT:
+		case KeyEvent.KEYCODE_MEDIA_NEXT:
+			mp.seekTo(mp.getCurrentPosition() + 5000);
+			return true;
+		case KeyEvent.KEYCODE_DPAD_LEFT:
+		case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+			mp.seekTo(mp.getCurrentPosition() - 5000);
 			return true;
 		default:
 			return super.onKeyDown(keyCode, event);
