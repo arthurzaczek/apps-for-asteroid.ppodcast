@@ -4,9 +4,21 @@
 	android:layout_height="fill_parent">
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/ViewShowTitle"
-		android:text="View Show" android:textStyle="bold" android:textSize="24sp" android:padding="10sp"></TextView>
-	<TextView android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/ViewShowDescription"
-		 android:textSize="20sp"
-		 android:padding="20sp"></TextView>
+		android:text="View Show" android:textStyle="bold" android:textSize="24sp"
+		android:padding="10sp"></TextView>
+	<TextView android:layout_height="0dip" android:layout_width="wrap_content"
+		android:layout_weight="1" android:id="@+id/ViewShowDescription"
+		android:textSize="20sp" android:padding="20sp" android:scrollbars="vertical"
+		android:text="Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."></TextView>
+	<LinearLayout android:orientation="horizontal" 
+				  android:layout_height="wrap_content"
+		          android:layout_width="fill_parent"
+		          android:padding="20sp">
+		<TextView android:layout_width="0dip" android:layout_weight="1"
+			android:layout_height="wrap_content" android:id="@+id/ViewShowStatus"
+			android:textSize="20sp" android:text="Stopped"></TextView>
+		<TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/ViewShowStatusBuffer"
+			android:textSize="20sp" android:layout_gravity="right" android:text="0%"></TextView>
+	</LinearLayout>
 </LinearLayout>

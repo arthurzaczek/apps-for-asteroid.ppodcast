@@ -9,6 +9,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnBufferingUpdateListener;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -17,7 +21,7 @@ import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ViewShow extends Activity {
+public class ViewShow extends Activity implements OnErrorListener, OnBufferingUpdateListener, OnCompletionListener, OnInfoListener {
 
 	private WakeLock wl;
 
@@ -29,6 +33,8 @@ public class ViewShow extends Activity {
 
 	private TextView showTitle;
 	private TextView showDescription;
+	private TextView showStatus;
+	private TextView showStatusBuffer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,13 +53,21 @@ public class ViewShow extends Activity {
 
 		showTitle = (TextView) findViewById(R.id.ViewShowTitle);
 		showDescription = (TextView) findViewById(R.id.ViewShowDescription);
+		showStatus = (TextView) findViewById(R.id.ViewShowStatus);
+		showStatusBuffer = (TextView) findViewById(R.id.ViewShowStatusBuffer);
 
 		mp = new MediaPlayer();
+		mp.setScreenOnWhilePlaying(true); // TODO: Remove wake lock
 		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		
+		mp.setOnErrorListener(this);
+		mp.setOnBufferingUpdateListener(this);
+		mp.setOnCompletionListener(this);
+		mp.setOnInfoListener(this);
 
 		fillData();
 	}
-
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
@@ -120,14 +134,51 @@ public class ViewShow extends Activity {
 			mp.setDataSource(url);
 			mp.setOnPreparedListener(new OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
+					showStatus.setText("Playing");
 					mp.start();
 					dismissDialog(DLG_WAIT);
 				}
 			});
+			showStatus.setText("Buffering");
 			showDialog(DLG_WAIT);
 			mp.prepareAsync();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+	}
+
+	public void onBufferingUpdate(MediaPlayer mp, int percent) {
+		showStatusBuffer.setText(percent + "%");
+	}
+	
+	public boolean onError(MediaPlayer mp, int what, int extra) {
+		String error;
+		switch (what) {
+		case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+			error = "Connection to server was broken";
+			break;
+		default:
+			error = "Unknown error during playback";
+			break;
+		}
+		showStatus.setText(error);
+		Toast.makeText(this, error, Toast.LENGTH_LONG);
+		return false;
+	}
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+		showStatus.setText("Finished");		
+	}
+
+	@Override
+	public boolean onInfo(MediaPlayer mp, int what, int extra) {
+		// nothing interesting
+//		MEDIA_INFO_UNKNOWN
+//		MEDIA_INFO_VIDEO_TRACK_LAGGING
+//		MEDIA_INFO_BAD_INTERLEAVING
+//		MEDIA_INFO_NOT_SEEKABLE
+//		MEDIA_INFO_METADATA_UPDATE
+		return false;
 	}
 }
