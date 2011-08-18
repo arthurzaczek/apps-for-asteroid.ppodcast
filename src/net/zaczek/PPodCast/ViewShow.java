@@ -94,6 +94,13 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
 			mp.seekTo(mp.getCurrentPosition() - 5000);
 			return true;
+		case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+			if(mp.isPlaying()) {
+				pause();
+			} else {
+				start();
+			}
+			return true;
 		default:
 			return super.onKeyDown(keyCode, event);
 		}
@@ -142,7 +149,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		String description = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_DESCRIPTION));
 		showDescription.setText(description);
 
-		String url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
+	    String url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
 		play(url);
 	}
 	private void updateStatus(String error) {
@@ -176,8 +183,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			mp.setDataSource(url);
 			mp.setOnPreparedListener(new OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
-					updateStatus(STATUS_PLAY);	
-					mp.start();
+					start();
 					dismissDialog(DLG_WAIT);
 				}
 			});
@@ -187,6 +193,16 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	private void start() {
+		mp.start();
+		updateStatus(STATUS_PLAY);
+	}
+	
+	private void pause() {
+		mp.pause();
+		updateStatus(STATUS_STOPPED);
 	}
 
 	public void onBufferingUpdate(MediaPlayer mp, int percent) {
