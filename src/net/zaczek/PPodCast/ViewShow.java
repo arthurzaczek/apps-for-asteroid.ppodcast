@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.view.KeyEvent;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ public class ViewShow extends Activity implements OnErrorListener,
 	private static final int STATUS_PLAY = 2;
 	private static final int STATUS_BUFFERING = 3;
 	private static final int STATUS_ERROR = 4;
+	private static final int STATUS_EXITING = 5;
 
 	private int status;
 
@@ -43,6 +45,9 @@ public class ViewShow extends Activity implements OnErrorListener,
 	private TextView showDescription;
 	private TextView showStatus;
 	private TextView showStatusBuffer;
+	private ProgressBar progBar;
+	private int bufferPercent;
+	private Runnable _progressUpdater;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,7 @@ public class ViewShow extends Activity implements OnErrorListener,
 		showDescription = (TextView) findViewById(R.id.ViewShowDescription);
 		showStatus = (TextView) findViewById(R.id.ViewShowStatus);
 		showStatusBuffer = (TextView) findViewById(R.id.ViewShowStatusBuffer);
+		progBar = (ProgressBar)findViewById(R.id.progBar);
 
 		mp = new MediaPlayer();
 		mp.setScreenOnWhilePlaying(true); // TODO: Remove wake lock
@@ -72,7 +78,9 @@ public class ViewShow extends Activity implements OnErrorListener,
 		mp.setOnBufferingUpdateListener(this);
 		mp.setOnCompletionListener(this);
 		mp.setOnInfoListener(this);
-
+		
+		progBar.setProgress(0);
+		createProgressThread();
 		updateStatus(STATUS_STOPPED);
 		fillData();
 	}
@@ -135,6 +143,7 @@ public class ViewShow extends Activity implements OnErrorListener,
 	protected void onPause() {
 		mp.stop();
 		wl.release();
+		status = STATUS_EXITING;
 		super.onPause();
 	}
 
@@ -218,6 +227,8 @@ public class ViewShow extends Activity implements OnErrorListener,
 	}
 
 	public void onBufferingUpdate(MediaPlayer mp, int percent) {
+		bufferPercent = percent;
+		progBar.setSecondaryProgress(percent);
 		showStatusBuffer.setText(percent + "% Buf.");
 	}
 
@@ -250,5 +261,38 @@ public class ViewShow extends Activity implements OnErrorListener,
 		// MEDIA_INFO_NOT_SEEKABLE
 		// MEDIA_INFO_METADATA_UPDATE
 		return false;
+	}
+	
+	private void createProgressThread() {
+
+	    _progressUpdater = new Runnable() {
+
+			@Override
+	        public void run() {
+	            while(status != STATUS_EXITING) {
+	                if(mp.isPlaying()) {
+	                    try
+	                    {
+	                        int current = 0;
+	                        int total = mp.getDuration();
+
+	                        while(mp.isPlaying() && current<total){
+	                            try {
+	                                Thread.sleep(1000); //Update once per second
+	                                current = mp.getCurrentPosition();
+	                                progBar.setProgress(100 * current / total); 
+	                            } catch (Exception e){
+
+	                            }            
+	                        }
+	                    }
+	                    catch(Exception e) {
+	                    }
+	                }
+	            }
+	        }
+	    };
+	    Thread thread = new Thread(_progressUpdater);
+	    thread.start();
 	}
 }
