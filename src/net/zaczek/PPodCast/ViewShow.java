@@ -278,8 +278,9 @@ public class ViewShow extends Activity implements OnErrorListener,
 
 	                        while(mp.isPlaying() && current<total){
 	                            try {
-	                                Thread.sleep(1000); //Update once per second
+	                                Thread.sleep(1000);
 	                                current = mp.getCurrentPosition();
+	                                // Is this legal?
 	                                progBar.setProgress(100 * current / total); 
 	                            } catch (Exception e){
 
