@@ -23,6 +23,13 @@ import android.widget.Toast;
 
 public class ViewShow extends Activity implements OnErrorListener, OnBufferingUpdateListener, OnCompletionListener, OnInfoListener {
 
+	private static final int STATUS_STOPPED = 1;
+	private static final int STATUS_PLAY = 2;
+	private static final int STATUS_BUFFERING = 3;
+	private static final int STATUS_ERROR = 4;
+	
+	private int status;
+	
 	private WakeLock wl;
 
 	private static final int DLG_WAIT = 1;
@@ -39,6 +46,8 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		updateStatus(STATUS_STOPPED);
 
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
@@ -136,18 +145,43 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		String url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
 		play(url);
 	}
+	private void updateStatus(String error) {
+		updateStatus(STATUS_ERROR, error);
+	}	
+	private void updateStatus(int newStatus) {
+		updateStatus(newStatus, "Unknown Error");
+	}	
+	private void updateStatus(int newStatus, String error) {
+		if(status == STATUS_ERROR && newStatus == STATUS_STOPPED) return;
+		status = newStatus;
+		
+		switch(status) {
+		case STATUS_BUFFERING:
+			showStatus.setText("Playing");
+			break;
+		case STATUS_PLAY:
+			showStatus.setText("Buffering");
+			break;
+		case STATUS_STOPPED:
+			showStatus.setText("Stopped");
+			break;
+		case STATUS_ERROR:
+			showStatus.setText(error);
+			break;
+		}
+	}
 
 	private void play(String url) {
 		try {
 			mp.setDataSource(url);
 			mp.setOnPreparedListener(new OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
-					showStatus.setText("Playing");
+					updateStatus(STATUS_PLAY);	
 					mp.start();
 					dismissDialog(DLG_WAIT);
 				}
 			});
-			showStatus.setText("Buffering");
+			updateStatus(STATUS_BUFFERING);	
 			showDialog(DLG_WAIT);
 			mp.prepareAsync();
 		} catch (Exception e) {
@@ -169,14 +203,14 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			error = "Unknown error during playback";
 			break;
 		}
-		showStatus.setText(error);
+		updateStatus(error);
 		Toast.makeText(this, error, Toast.LENGTH_LONG);
 		return false;
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		showStatus.setText("Finished");		
+		updateStatus(STATUS_STOPPED);		
 	}
 
 	@Override
