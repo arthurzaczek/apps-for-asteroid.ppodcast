@@ -1,6 +1,7 @@
 package net.zaczek.PPodCast;
 
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
+import net.zaczek.PPodCast.util.DateUtil;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -19,13 +20,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ViewShow extends Activity implements OnErrorListener, OnBufferingUpdateListener, OnCompletionListener, OnInfoListener, OnSeekCompleteListener {
-
+	private static final String TAG = "PPodCast";
+		
 	private static final int STATUS_STOPPED = 1;
 	private static final int STATUS_PLAY = 2;
 	private static final int STATUS_BUFFERING = 3;
@@ -45,7 +48,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private TextView showTitle;
 	private TextView showDescription;
 	private TextView showStatus;
-	private TextView showStatusBuffer;
+	private TextView showStatusCurrent;
 	private ProgressBar progBar;
 	private int current;
 	private int total;
@@ -56,7 +59,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
 
@@ -71,7 +74,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		showTitle = (TextView) findViewById(R.id.ViewShowTitle);
 		showDescription = (TextView) findViewById(R.id.ViewShowDescription);
 		showStatus = (TextView) findViewById(R.id.ViewShowStatus);
-		showStatusBuffer = (TextView) findViewById(R.id.ViewShowStatusBuffer);
+		showStatusCurrent = (TextView) findViewById(R.id.ViewShowStatusCurrent);
 		progBar = (ProgressBar) findViewById(R.id.progBar);
 
 		mp = new MediaPlayer();
@@ -115,7 +118,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 				} else {
 					start();
 				}
-			} else if(status == STATUS_ERROR || status == STATUS_STOPPED) {
+			} else if (status == STATUS_ERROR || status == STATUS_STOPPED) {
 				play(url);
 			}
 			return true;
@@ -171,10 +174,13 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
 		play(url);
 	}
-	
+
 	private void updateProgress() {
 		current = mp.getCurrentPosition();
-		progBar.setProgress(100 * current / total);
+		if (total > 0) {
+			progBar.setProgress(100 * current / total);
+		}
+		showStatusCurrent.setText(DateUtil.getTimeString(current) + "/" + DateUtil.getTimeString(total));
 	}
 
 	private void updateStatus(String error) {
@@ -184,18 +190,18 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private void updateStatus(int newStatus) {
 		updateStatus(newStatus, "Unknown Error");
 	}
-	
+
 	private void updateStatus(int newStatus, String error) {
 		if (status == STATUS_ERROR && newStatus == STATUS_STOPPED)
 			return;
 		status = newStatus;
-		
+
 		switch (status) {
 		case STATUS_BUFFERING:
 			showStatus.setText("Buffering");
 			break;
 		case STATUS_PLAY:
-			if(mp.isPlaying()) {
+			if (mp.isPlaying()) {
 				showStatus.setText("Playing");
 			} else {
 				showStatus.setText("Pause");
@@ -206,28 +212,34 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			current = 0;
 			break;
 		case STATUS_ERROR:
-			showStatus.setText(error);
+			showStatus.setText("Error");
 			break;
 		}
 	}
 
 	private void play(String url) {
 		try {
+			total = 0;
+			mp.reset();
 			mp.setDataSource(url);
 			mp.setOnPreparedListener(new OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
 					// restore
-					if(current != 0) mp.seekTo(current);					
+					if (current != 0)
+						mp.seekTo(current);
 					start();
 					total = mp.getDuration();
 					dismissDialog(DLG_WAIT);
+					updateProgress();
 				}
 			});
+			updateProgress();
 			updateStatus(STATUS_BUFFERING);
 			showDialog(DLG_WAIT);
 			mp.prepareAsync();
 		} catch (Exception e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+			Log.e(TAG, "Error during play(url)", e);
+			Toast.makeText(this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -243,7 +255,6 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 	public void onBufferingUpdate(MediaPlayer mp, int percent) {
 		progBar.setSecondaryProgress(percent);
-		showStatusBuffer.setText(percent + "% Buf.");
 	}
 
 	public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -257,6 +268,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			break;
 		}
 		updateStatus(error);
+		try {
+			dismissDialog(DLG_WAIT);
+		} catch(Exception e) {
+			// I don't want to track if I opened the dialog or not
+		}
 		Toast.makeText(this, error, Toast.LENGTH_LONG);
 		return false;
 	}
@@ -283,6 +299,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	private Handler handler = new Handler();
+
 	private void createProgressThread() {
 
 		_progressUpdater = new Runnable() {
@@ -292,13 +309,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 				while (status != STATUS_EXITING) {
 					try {
 						Thread.sleep(1000);
-						if (mp.isPlaying()) {
-							handler.post(new Runnable() {
-								public void run() {
-									updateProgress();
-								}
-							});
-						}
+						handler.post(new Runnable() {
+							public void run() {
+								updateProgress();
+							}
+						});
 					} catch (Exception e) {
 					}
 				}
