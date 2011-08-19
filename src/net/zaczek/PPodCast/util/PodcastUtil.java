@@ -55,11 +55,11 @@ public class PodcastUtil {
 			Cursor cShows = podcastDb.fetchAllShowsForPodcast(podcastId);
 			try {
 				while (cShows.moveToNext()) {
-					String showUrl = c.getString(cShows
+					final String showUrl = cShows.getString(cShows
 							.getColumnIndex(PuddleDbAdapter.SHOW_URL));
-					long showId = c.getLong(cShows
-							.getColumnIndex(PuddleDbAdapter.SHOW_ROWID));
 					if (podcast.findShow(showUrl) == null) {
+						final long showId = cShows.getLong(cShows
+								.getColumnIndex(PuddleDbAdapter.SHOW_ROWID));
 						podcastDb.deleteShow(showId);
 					}
 				}

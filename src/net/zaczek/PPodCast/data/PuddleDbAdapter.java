@@ -144,8 +144,9 @@ public class PuddleDbAdapter {
 	}
 
 	public boolean deleteShow(long rowId) {
-		Log.d(TAG, "Deleting show " + rowId);
-		return db.delete(DATABASE_SHOWS_TABLE, SHOW_ROWID + "=" + rowId, null) > 0;
+		boolean result = db.delete(DATABASE_SHOWS_TABLE, SHOW_ROWID + "=" + rowId, null) > 0;
+		Log.d(TAG, "Deleting show " + rowId + "; result = " + result);
+		return result;
 	}
 
 	public Cursor fetchAllShowsForPodcast(long podcast) {
