@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,8 +30,6 @@ public class ViewPodcast extends Activity {
 	private static final int MENU_UPDATE_PODCAST = 0;
 
 	private static final int ACTIVITY_VIEW_SHOW = 0;
-	private static final int DLG_WAIT = 1;
-	private boolean waitDlgShown = false;
 
 	private long podcastId = -1;
 	private String title;
@@ -37,6 +37,7 @@ public class ViewPodcast extends Activity {
 
 	private TextView titleTextView;
 	private ListView showList;
+	private ProgressBar progBar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,9 @@ public class ViewPodcast extends Activity {
 
 		showList = (ListView) findViewById(R.id.view_podcast_list_shows);
 		titleTextView = (TextView) findViewById(R.id.view_podcast_title);
+		progBar = (ProgressBar)findViewById(R.id.view_podcast_progress);
+
+		progBar.setVisibility(View.INVISIBLE);
 
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
@@ -109,7 +113,6 @@ public class ViewPodcast extends Activity {
 		Log.d(TAG, "Menu item selected: " + itemId);
 		switch (itemId) {
 		case MENU_UPDATE_PODCAST:
-			showDialog(DLG_WAIT);
 			updatePodcast();
 			return true;
 		}
@@ -123,7 +126,7 @@ public class ViewPodcast extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			titleTextView.setText("* " + title);
+			progBar.setVisibility(View.VISIBLE );
 		}
 
 		@Override
@@ -138,12 +141,9 @@ public class ViewPodcast extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			if(waitDlgShown == true) {
-				dismissDialog(DLG_WAIT);
-				waitDlgShown = false;
-			}
 			reportMsg(msg);
 			fillData();
+			progBar.setVisibility(View.INVISIBLE);
 			updateTask = null;
 			super.onPostExecute(result);
 		}
@@ -162,20 +162,5 @@ public class ViewPodcast extends Activity {
 			updateTask = new UpdateTask();
 			updateTask.execute();
 		}
-	}
-	
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		ProgressDialog dialog;
-		switch (id) {
-		case DLG_WAIT:
-			waitDlgShown = true;
-			dialog = new ProgressDialog(this);
-			dialog.setMessage("Updating Podcast");
-			break;
-		default:
-			dialog = null;
-		}
-		return dialog;
 	}
 }

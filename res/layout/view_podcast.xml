@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" >
-	<TextView android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:text="View Podcast"
-		android:padding="5sp" android:textStyle="bold" android:id="@+id/view_podcast_title" android:textSize="24sp"></TextView>
+	android:layout_height="fill_parent">
+	<LinearLayout android:orientation="horizontal"
+		android:layout_height="wrap_content" android:layout_width="fill_parent">
+		<TextView android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_width="0sp" android:text="View Podcast"
+			android:padding="5sp" android:textStyle="bold" android:id="@+id/view_podcast_title"
+			android:textSize="24sp"></TextView>
+		<ProgressBar android:id="@+id/view_podcast_progress" 
+				android:layout_width="40sp" android:layout_height="40sp"/>
+	</LinearLayout>
 	<ListView android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:id="@+id/view_podcast_list_shows"></ListView>
 </LinearLayout>
