@@ -224,11 +224,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			mp.setDataSource(url);
 			mp.setOnPreparedListener(new OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
+					start();
+					total = mp.getDuration();
 					// restore
 					if (current != 0)
 						mp.seekTo(current);
-					start();
-					total = mp.getDuration();
 					dismissDialog(DLG_WAIT);
 					updateProgress();
 				}
