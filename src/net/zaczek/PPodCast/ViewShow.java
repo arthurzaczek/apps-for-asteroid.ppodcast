@@ -62,7 +62,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
-
+		
 		setContentView(R.layout.view_show);
 
 		podcastDb = new PuddleDbAdapter(this);
@@ -77,6 +77,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		showStatusCurrent = (TextView) findViewById(R.id.ViewShowStatusCurrent);
 		progBar = (ProgressBar) findViewById(R.id.progBar);
 
+		current = 0;
 		mp = new MediaPlayer();
 		mp.setScreenOnWhilePlaying(true); // TODO: Remove wake lock
 		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -176,7 +177,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	private void updateProgress() {
-		current = mp.getCurrentPosition();
+		int tmp = mp.getCurrentPosition();
+		if(tmp >= current)
+		{
+			current = tmp;
+		}
 		if (total > 0) {
 			progBar.setProgress(100 * current / total);
 		}
@@ -209,7 +214,6 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			break;
 		case STATUS_STOPPED:
 			showStatus.setText("Finished");
-			current = 0;
 			break;
 		case STATUS_ERROR:
 			showStatus.setText("Error");
