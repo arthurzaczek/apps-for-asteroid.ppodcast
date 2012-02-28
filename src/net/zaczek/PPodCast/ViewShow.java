@@ -50,11 +50,12 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private TextView showStatus;
 	private TextView showStatusCurrent;
 	private ProgressBar progBar;
-	private int current;
+	private int lastPosition;
 	private int total;
 	private String url;
 
 	private Runnable _progressUpdater;
+	private Thread _progressThread;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		showStatusCurrent = (TextView) findViewById(R.id.ViewShowStatusCurrent);
 		progBar = (ProgressBar) findViewById(R.id.progBar);
 
-		current = 0;
+		lastPosition = 0;
 		mp = new MediaPlayer();
 		mp.setScreenOnWhilePlaying(true); // TODO: Remove wake lock
 		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -89,11 +90,26 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		mp.setOnSeekCompleteListener(this);
 
 		progBar.setProgress(0);
-		createProgressThread();
-		updateStatus(STATUS_STOPPED);
 		fillData();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		updateStatus(STATUS_STOPPED);
+		wl.acquire();
+		createProgressThread();
+		play(url);
+	}
+
+	@Override
+	protected void onPause() {
+		mp.stop();
+		wl.release();
+		status = STATUS_EXITING;
+		super.onPause();
+	}
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
@@ -141,21 +157,6 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		}
 		return dialog;
 	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		wl.acquire();
-	}
-
-	@Override
-	protected void onPause() {
-		mp.stop();
-		wl.release();
-		status = STATUS_EXITING;
-		super.onPause();
-	}
-
 	private void fillData() {
 		Cursor showCursor = podcastDb.fetchShow(show);
 
@@ -173,19 +174,18 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		showDescription.setText(description);
 
 		url = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_URL));
-		play(url);
 	}
 
 	private void updateProgress() {
-		int tmp = mp.getCurrentPosition();
-		if(tmp >= current)
+		int pos = mp.getCurrentPosition();
+		if(pos >= lastPosition)
 		{
-			current = tmp;
+			lastPosition = pos;
 		}
 		if (total > 0) {
-			progBar.setProgress(100 * current / total);
+			progBar.setProgress(100 * pos / total);
 		}
-		showStatusCurrent.setText(DateUtil.getTimeString(current) + "/" + DateUtil.getTimeString(total));
+		showStatusCurrent.setText(DateUtil.getTimeString(pos) + "/" + DateUtil.getTimeString(total));
 	}
 
 	private void updateStatus(String error) {
@@ -230,9 +230,6 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 				public void onPrepared(MediaPlayer mp) {
 					start();
 					total = mp.getDuration();
-					// restore
-					if (current != 0)
-						mp.seekTo(current);
 					dismissDialog(DLG_WAIT);
 					updateProgress();
 				}
@@ -249,7 +246,13 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 	private void start() {
 		mp.start();
+		// restore
+		if (lastPosition != 0)
+		{
+			mp.seekTo(lastPosition);
+		}
 		updateStatus(STATUS_PLAY);
+		updateProgress();
 	}
 
 	private void pause() {
@@ -305,7 +308,6 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private Handler handler = new Handler();
 
 	private void createProgressThread() {
-
 		_progressUpdater = new Runnable() {
 
 			@Override
@@ -323,7 +325,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 				}
 			}
 		};
-		Thread thread = new Thread(_progressUpdater);
-		thread.start();
+		_progressThread = new Thread(_progressUpdater);
+		_progressThread.start();
 	}
 }
