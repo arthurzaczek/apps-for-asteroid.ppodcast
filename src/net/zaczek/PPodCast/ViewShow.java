@@ -274,6 +274,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			error = "Unknown error during playback";
 			break;
 		}
+		try {
+			mp.stop();
+		} catch (Exception e) {
+			// Don't care, error state
+		}
 		updateStatus(error);
 		try {
 			dismissDialog(DLG_WAIT);
