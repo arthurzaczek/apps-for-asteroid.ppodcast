@@ -1,6 +1,8 @@
 package net.zaczek.PPodCast;
 
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
+import net.zaczek.PPodCast.tts.ParrotTTSObserver;
+import net.zaczek.PPodCast.tts.ParrotTTSPlayer;
 import net.zaczek.PPodCast.util.PodcastUtil;
 import android.app.Activity;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
@@ -20,9 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class ViewPodcast extends Activity {
+public class ViewPodcast extends Activity implements ParrotTTSObserver {
 
 	private static final String TAG = ViewPodcast.class.getName();
+	private ParrotTTSPlayer mTTSPlayer = null;
 
 	private static final int MENU_UPDATE_PODCAST = 0;
 
@@ -44,12 +48,14 @@ public class ViewPodcast extends Activity {
 
 		showList = (ListView) findViewById(R.id.view_podcast_list_shows);
 		titleTextView = (TextView) findViewById(R.id.view_podcast_title);
-		progBar = (ProgressBar)findViewById(R.id.view_podcast_progress);
+		progBar = (ProgressBar) findViewById(R.id.view_podcast_progress);
 
 		progBar.setVisibility(View.INVISIBLE);
 
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
+
+		mTTSPlayer = new ParrotTTSPlayer(this, this);
 
 		Intent intent = getIntent();
 		podcastId = intent.getLongExtra("podcast", -1);
@@ -64,6 +70,31 @@ public class ViewPodcast extends Activity {
 				viewShow(id);
 			}
 		});
+
+		showList.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> adapterView, View view,
+					int pos, long id) {
+				try {
+					Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
+					StringBuilder sb = new StringBuilder();
+					sb.append(c.getString(c
+							.getColumnIndex(PuddleDbAdapter.SHOW_DATE)));
+					sb.append("\n");
+					sb.append(c.getString(c
+							.getColumnIndex(PuddleDbAdapter.SHOW_TITLE)));
+
+					mTTSPlayer.play(sb.toString());
+				} catch (Exception ex) {
+					Log.e(TAG, ex.toString());
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+
+			}
+		});
 	}
 
 	protected void viewShow(long id) {
@@ -75,8 +106,8 @@ public class ViewPodcast extends Activity {
 	private void fillData() {
 		Cursor c = podcastDb.fetchPodcast(podcastId);
 		try {
-			title = c.getString(c
-					.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE));
+			title = c
+					.getString(c.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE));
 			titleTextView.setText(title);
 		} finally {
 			c.close();
@@ -123,7 +154,7 @@ public class ViewPodcast extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			progBar.setVisibility(View.VISIBLE );
+			progBar.setVisibility(View.VISIBLE);
 		}
 
 		@Override
@@ -159,5 +190,15 @@ public class ViewPodcast extends Activity {
 			updateTask = new UpdateTask();
 			updateTask.execute();
 		}
+	}
+
+	@Override
+	public void onTTSFinished() {
+
+	}
+
+	@Override
+	public void onTTSAborted() {
+
 	}
 }

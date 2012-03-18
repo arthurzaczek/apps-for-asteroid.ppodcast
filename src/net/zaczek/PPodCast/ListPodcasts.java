@@ -1,6 +1,8 @@
 package net.zaczek.PPodCast;
 
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
+import net.zaczek.PPodCast.tts.ParrotTTSObserver;
+import net.zaczek.PPodCast.tts.ParrotTTSPlayer;
 import net.zaczek.PPodCast.util.PodcastUtil;
 
 import android.app.Dialog;
@@ -15,11 +17,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 
-public class ListPodcasts extends ListActivity {
+public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnItemSelectedListener {
 	private static final String TAG = ListPodcasts.class.getName();
 
 	private static final int ACTIVITY_VIEW_PODCAST = 0;
@@ -30,6 +34,7 @@ public class ListPodcasts extends ListActivity {
 	private static final int ABOUT_ID = Menu.FIRST + 2;
 
 	private PuddleDbAdapter podcastDb;
+	private ParrotTTSPlayer mTTSPlayer = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -38,9 +43,30 @@ public class ListPodcasts extends ListActivity {
 
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
+		
+		mTTSPlayer = new ParrotTTSPlayer(this, this);
+		
+		getListView().setOnItemSelectedListener(this);
 
 		fillData();
 		syncPodcast();
+	}
+	
+	@Override
+	public void onItemSelected(AdapterView<?> adapterView, View view,
+			int pos, long id) {
+		try {
+			Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
+			mTTSPlayer.play(c.getString(c
+					.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE)));
+		} catch (Exception ex) {
+			Log.e(TAG, ex.toString());
+		}
+	}
+
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
+
 	}
 
 	private void fillData() {
@@ -54,6 +80,7 @@ public class ListPodcasts extends ListActivity {
 		SimpleCursorAdapter podcastsAdapter = new SimpleCursorAdapter(this, R.layout.list_podcasts_row, podcastsCursor, from, to);
 		setListAdapter(podcastsAdapter);
 	}
+	
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -146,5 +173,15 @@ public class ListPodcasts extends ListActivity {
 			return pDialog;
 		}
 		return null;
+	}
+
+	@Override
+	public void onTTSFinished() {
+		
+	}
+
+	@Override
+	public void onTTSAborted() {
+		
 	}
 }
