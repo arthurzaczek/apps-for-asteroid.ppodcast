@@ -3,6 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="P:/Android/Parrot-Projects/apps-for-asteroid.ppodcast/lib/sdk_hsti.jar"/>
+	<classpathentry kind="lib" path="P:/Android/asteroid-projects-git/apps-for-asteroid.ptalkingbrowser/libs/sdk_hsti.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

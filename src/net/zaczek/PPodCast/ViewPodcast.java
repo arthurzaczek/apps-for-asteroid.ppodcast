@@ -77,14 +77,8 @@ public class ViewPodcast extends Activity implements ParrotTTSObserver {
 					int pos, long id) {
 				try {
 					Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
-					StringBuilder sb = new StringBuilder();
-					sb.append(c.getString(c
-							.getColumnIndex(PuddleDbAdapter.SHOW_DATE)));
-					sb.append("\n");
-					sb.append(c.getString(c
+					mTTSPlayer.play(c.getString(c
 							.getColumnIndex(PuddleDbAdapter.SHOW_TITLE)));
-
-					mTTSPlayer.play(sb.toString());
 				} catch (Exception ex) {
 					Log.e(TAG, ex.toString());
 				}
