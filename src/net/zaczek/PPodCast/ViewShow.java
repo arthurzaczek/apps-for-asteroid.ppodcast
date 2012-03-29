@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 public class ViewShow extends Activity implements OnErrorListener, OnBufferingUpdateListener, OnCompletionListener, OnInfoListener, OnSeekCompleteListener {
 	private static final String TAG = "PPodCast";
-		
+
 	private static final int STATUS_STOPPED = 1;
 	private static final int STATUS_PLAY = 2;
 	private static final int STATUS_BUFFERING = 3;
@@ -63,7 +63,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
-		
+
 		setContentView(R.layout.view_show);
 
 		podcastDb = new PuddleDbAdapter(this);
@@ -79,18 +79,30 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		progBar = (ProgressBar) findViewById(R.id.progBar);
 
 		lastPosition = 0;
+		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		initPlayer();
+
+		progBar.setProgress(0);
+		fillData();
+	}
+
+	private void initPlayer() {
+		if (mp != null) {
+			try {
+			mp.stop();
+			mp.release();
+			} catch(Exception ex) {
+				// Don't care, recreating the player
+			}
+		}
 		mp = new MediaPlayer();
 		mp.setScreenOnWhilePlaying(true); // TODO: Remove wake lock
-		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 
 		mp.setOnErrorListener(this);
 		mp.setOnBufferingUpdateListener(this);
 		mp.setOnCompletionListener(this);
 		mp.setOnInfoListener(this);
 		mp.setOnSeekCompleteListener(this);
-
-		progBar.setProgress(0);
-		fillData();
 	}
 
 	@Override
@@ -109,7 +121,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		status = STATUS_EXITING;
 		super.onPause();
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
@@ -157,6 +169,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		}
 		return dialog;
 	}
+
 	private void fillData() {
 		Cursor showCursor = podcastDb.fetchShow(show);
 
@@ -178,8 +191,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 	private void updateProgress() {
 		int pos = mp.getCurrentPosition();
-		if(pos >= lastPosition)
-		{
+		if (pos >= lastPosition) {
 			lastPosition = pos;
 		}
 		if (total > 0) {
@@ -247,8 +259,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private void start() {
 		mp.start();
 		// restore
-		if (lastPosition != 0)
-		{
+		if (lastPosition != 0) {
 			mp.seekTo(lastPosition);
 		}
 		updateStatus(STATUS_PLAY);
@@ -274,15 +285,12 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			error = "Unknown error during playback";
 			break;
 		}
-		try {
-			mp.stop();
-		} catch (Exception e) {
-			// Don't care, error state
-		}
+		// Re-init player, stop/play etc. does not help
+		initPlayer(); 
 		updateStatus(error);
 		try {
 			dismissDialog(DLG_WAIT);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// I don't want to track if I opened the dialog or not
 		}
 		Toast.makeText(this, error, Toast.LENGTH_LONG);
@@ -313,24 +321,26 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private Handler handler = new Handler();
 
 	private void createProgressThread() {
-		_progressUpdater = new Runnable() {
+		if (_progressThread != null) {
+			_progressUpdater = new Runnable() {
 
-			@Override
-			public void run() {
-				while (status != STATUS_EXITING) {
-					try {
-						Thread.sleep(1000);
-						handler.post(new Runnable() {
-							public void run() {
-								updateProgress();
-							}
-						});
-					} catch (Exception e) {
+				@Override
+				public void run() {
+					while (status != STATUS_EXITING) {
+						try {
+							Thread.sleep(1000);
+							handler.post(new Runnable() {
+								public void run() {
+									updateProgress();
+								}
+							});
+						} catch (Exception e) {
+						}
 					}
 				}
-			}
-		};
-		_progressThread = new Thread(_progressUpdater);
-		_progressThread.start();
+			};
+			_progressThread = new Thread(_progressUpdater);
+			_progressThread.start();
+		}
 	}
 }
