@@ -84,6 +84,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		progBar.setProgress(0);
 		fillData();
+		createProgressThread();
 	}
 
 	private void initPlayer() {
@@ -319,6 +320,11 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	private Handler handler = new Handler();
+	private Runnable handlerAction = new Runnable() {
+		public void run() {
+			updateProgress();
+		}
+	};
 
 	private void createProgressThread() {
 		if (_progressThread != null) {
@@ -329,14 +335,13 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 					while (status != STATUS_EXITING) {
 						try {
 							Thread.sleep(1000);
-							handler.post(new Runnable() {
-								public void run() {
-									updateProgress();
-								}
-							});
+							handler.post(handlerAction);
 						} catch (Exception e) {
 						}
 					}
+					
+					_progressThread = null;
+					_progressUpdater = null;
 				}
 			};
 			_progressThread = new Thread(_progressUpdater);
