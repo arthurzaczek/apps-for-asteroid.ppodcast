@@ -1,5 +1,8 @@
 package net.zaczek.PPodCast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
 import net.zaczek.PPodCast.util.DateUtil;
 import android.app.Activity;
@@ -54,8 +57,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	private int total;
 	private String url;
 
-	private Runnable _progressUpdater;
-	private Thread _progressThread;
+	private Timer _updateTimer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -84,14 +86,15 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		progBar.setProgress(0);
 		fillData();
-		createProgressThread();
+		createUpdateTimer();
 	}
 
 	private void initPlayer() {
+		Log.i(TAG, "initPlayer");
 		if (mp != null) {
 			try {
-			mp.stop();
-			mp.release();
+				mp.stop();
+				mp.release();
 			} catch(Exception ex) {
 				// Don't care, recreating the player
 			}
@@ -108,18 +111,24 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 	@Override
 	protected void onResume() {
+		Log.i(TAG, "onResume");
 		super.onResume();
 		updateStatus(STATUS_STOPPED);
 		wl.acquire();
-		createProgressThread();
+		createUpdateTimer();
 		play(url);
 	}
 
 	@Override
 	protected void onPause() {
+		Log.i(TAG, "onPause");
 		mp.stop();
 		wl.release();
 		status = STATUS_EXITING;
+		if (_updateTimer != null) {
+			_updateTimer.cancel();
+			_updateTimer = null;
+		}
 		super.onPause();
 	}
 
@@ -183,6 +192,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		String title = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_TITLE));
 		showTitle.setText(title);
+		Log.i(TAG, "fill Data for show " + title);
 
 		String description = showCursor.getString(showCursor.getColumnIndex(PuddleDbAdapter.SHOW_DESCRIPTION));
 		showDescription.setText(description);
@@ -194,6 +204,8 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		int pos = mp.getCurrentPosition();
 		if (pos >= lastPosition) {
 			lastPosition = pos;
+		} else {
+			Log.d(TAG, "Position is less then last pos: " + pos  + " < " + lastPosition);
 		}
 		if (total > 0) {
 			progBar.setProgress(100 * pos / total);
@@ -210,32 +222,42 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	private void updateStatus(int newStatus, String error) {
+		Log.i(TAG, "updateStatus: " + newStatus);
 		if (status == STATUS_ERROR && newStatus == STATUS_STOPPED)
+		{
+			Log.i(TAG, "  ignoring new Status Stopped because in error state");
 			return;
+		}
 		status = newStatus;
 
 		switch (status) {
 		case STATUS_BUFFERING:
+			Log.i(TAG, "  Buffering");
 			showStatus.setText("Buffering");
 			break;
 		case STATUS_PLAY:
 			if (mp.isPlaying()) {
+				Log.i(TAG, "  Playing");
 				showStatus.setText("Playing");
 			} else {
+				Log.i(TAG, "  Pause");
 				showStatus.setText("Pause");
 			}
 			break;
 		case STATUS_STOPPED:
+			Log.i(TAG, "  Finished");
 			showStatus.setText("Finished");
 			break;
 		case STATUS_ERROR:
-			showStatus.setText("Error");
+			Log.w(TAG, "Error Status: " + error);
+			showStatus.setText("Error: " + error);
 			break;
 		}
 	}
 
 	private void play(String url) {
 		try {
+			Log.i(TAG, "playing " + url);
 			total = 0;
 			mp.reset();
 			mp.setDataSource(url);
@@ -258,13 +280,15 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 	}
 
 	private void start() {
+		Log.i(TAG, "start");
 		mp.start();
-		// restore
-		if (lastPosition != 0) {
-			mp.seekTo(lastPosition);
-		}
 		updateStatus(STATUS_PLAY);
 		updateProgress();
+		// restore
+		if (lastPosition != 0) {
+			Log.i(TAG, "seeking to last position " + lastPosition);
+			mp.seekTo(lastPosition);
+		}
 	}
 
 	private void pause() {
@@ -286,6 +310,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			error = "Unknown error during playback";
 			break;
 		}
+		Log.i(TAG, "onError: " + error);
 		// Re-init player, stop/play etc. does not help
 		initPlayer(); 
 		updateStatus(error);
@@ -300,11 +325,13 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 	@Override
 	public void onSeekComplete(MediaPlayer mp) {
+		Log.i(TAG, "onSeekComplete");
 		updateProgress();
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
+		Log.i(TAG, "onCompletion");
 		updateStatus(STATUS_STOPPED);
 	}
 
@@ -325,27 +352,17 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 			updateProgress();
 		}
 	};
+	
+	class UpdateTimeTask extends TimerTask {
+		public void run() {
+			handler.post(handlerAction);
+		}
+	}
 
-	private void createProgressThread() {
-		if (_progressThread != null) {
-			_progressUpdater = new Runnable() {
-
-				@Override
-				public void run() {
-					while (status != STATUS_EXITING) {
-						try {
-							Thread.sleep(1000);
-							handler.post(handlerAction);
-						} catch (Exception e) {
-						}
-					}
-					
-					_progressThread = null;
-					_progressUpdater = null;
-				}
-			};
-			_progressThread = new Thread(_progressUpdater);
-			_progressThread.start();
+	private void createUpdateTimer() {
+		if (_updateTimer == null) {
+			_updateTimer = new Timer();
+			_updateTimer.schedule(new UpdateTimeTask(), 1000, 1000);
 		}
 	}
 }
