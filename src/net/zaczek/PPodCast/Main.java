@@ -36,6 +36,8 @@ public class Main extends AbstractListActivity implements OnItemSelectedListener
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(TAG, "Setting up Main activity");
+		
+		setContentView(R.layout.main);
 
 		getListView().setOnItemSelectedListener(this);
 

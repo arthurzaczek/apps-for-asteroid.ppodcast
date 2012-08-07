@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<color name="plainBlack">#FF000000</color>
+<color name="plainWhite">#FFFFFFFF</color>
+<color name="disabledGrey">#FF232323</color>
+<color name="divider">#FF303030</color>
+<color name="transparent">#00000000</color>
+<color name="dark">#FF000000</color>
+</resources>

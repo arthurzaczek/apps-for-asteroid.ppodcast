@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds. -->
+<resources>
+
+    <!-- ############################## -->
+    <!--   PARROT ASTEROID CONFIGURATIONS   -->
+    <!-- ############################## -->
+    
+    <!-- All Screens -->
+    <dimen name="config_row_size">47px</dimen>
+    <dimen name="config_list_row_size">47px</dimen>
+    <dimen name="config_divider_size">1px</dimen>
+    
+	<!-- List Screen -->
+    <dimen name="config_text_ListScreen_title_size">30px</dimen>
+    <dimen name="config_picto_ListScreen_title_right_margin">15px</dimen>
+    <dimen name="config_picto_ListScreen_notif_left_margin">15px</dimen>
+    <dimen name="config_row_ListScreen_title_left_and_right_margin">15px</dimen>
+        
+    <!-- ListItem -->
+    <!-- dimensions for layout -->
+    <dimen name="config_text_ListItem_size">26px</dimen>
+    <dimen name="config_picto_ListItem_right_margin">20px</dimen>
+    <dimen name="config_row_ListItem_left_margin">40px</dimen>
+    <dimen name="config_row_ListItem_right_margin">20px</dimen>
+</resources>
