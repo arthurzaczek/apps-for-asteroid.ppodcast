@@ -37,6 +37,8 @@ public class ListPodcasts extends AbstractListActivity implements OnItemSelected
 		super.onCreate(savedInstanceState);
 		Log.d(TAG, "Setting up List Podcasts activity");
 
+		getListView().setOnItemSelectedListener(this);
+
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
 		

@@ -44,6 +44,7 @@ public class ViewPodcast extends AbstractListActivity implements OnItemSelectedL
 		showList = getListView();
 		titleTextView = (TextView) findViewById(R.id.view_podcast_title);
 		progBar = (ProgressBar) findViewById(R.id.view_podcast_progress);
+		getListView().setOnItemSelectedListener(this);
 
 		progBar.setVisibility(View.INVISIBLE);
 
