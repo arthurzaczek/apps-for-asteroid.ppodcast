@@ -83,7 +83,9 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		lastPosition = 0;
 		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 		initPlayer();
-		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		// This affect nothing
+		// setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		progBar.setProgress(0);
 		fillData();
