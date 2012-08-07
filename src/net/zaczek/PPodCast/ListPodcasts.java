@@ -1,12 +1,9 @@
 package net.zaczek.PPodCast;
 
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
-import net.zaczek.PPodCast.tts.ParrotTTSObserver;
-import net.zaczek.PPodCast.tts.ParrotTTSPlayer;
 import net.zaczek.PPodCast.util.PodcastUtil;
 
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
@@ -23,7 +20,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnItemSelectedListener {
+public class ListPodcasts extends AbstractListActivity implements OnItemSelectedListener {
 	private static final String TAG = ListPodcasts.class.getName();
 
 	private static final int ACTIVITY_VIEW_PODCAST = 0;
@@ -34,7 +31,6 @@ public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnI
 	private static final int ABOUT_ID = Menu.FIRST + 2;
 
 	private PuddleDbAdapter podcastDb;
-	private ParrotTTSPlayer mTTSPlayer = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,10 +40,6 @@ public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnI
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
 		
-		mTTSPlayer = new ParrotTTSPlayer(this, this);
-		
-		getListView().setOnItemSelectedListener(this);
-
 		fillData();
 		syncPodcast();
 	}
@@ -69,6 +61,14 @@ public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnI
 
 	}
 
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Log.d(TAG, "Opening podcast at position " + position + " with id " + id);
+		Intent i = new Intent(this, ViewPodcast.class);
+		i.putExtra("podcast", id);
+		startActivityForResult(i, ACTIVITY_VIEW_PODCAST);
+	}
+
 	private void fillData() {
 		Log.d(TAG, "Filling podcast list with data");
 		Cursor podcastsCursor = podcastDb.fetchAllPodcasts();
@@ -81,15 +81,6 @@ public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnI
 		setListAdapter(podcastsAdapter);
 	}
 	
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Log.d(TAG, "Opening podcast at position " + position + " with id " + id);
-		Intent i = new Intent(this, ViewPodcast.class);
-		i.putExtra("podcast", id);
-		startActivityForResult(i, ACTIVITY_VIEW_PODCAST);
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -173,15 +164,5 @@ public class ListPodcasts extends ListActivity implements ParrotTTSObserver, OnI
 			return pDialog;
 		}
 		return null;
-	}
-
-	@Override
-	public void onTTSFinished() {
-		
-	}
-
-	@Override
-	public void onTTSAborted() {
-		
 	}
 }

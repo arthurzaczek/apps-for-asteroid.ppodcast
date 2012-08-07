@@ -1,10 +1,7 @@
 package net.zaczek.PPodCast;
 
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
-import net.zaczek.PPodCast.tts.ParrotTTSObserver;
-import net.zaczek.PPodCast.tts.ParrotTTSPlayer;
 import net.zaczek.PPodCast.util.PodcastUtil;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -21,12 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class ViewPodcast extends Activity implements ParrotTTSObserver {
+public class ViewPodcast extends AbstractListActivity implements OnItemSelectedListener {
 
 	private static final String TAG = ViewPodcast.class.getName();
-	private ParrotTTSPlayer mTTSPlayer = null;
 
 	private static final int MENU_UPDATE_PODCAST = 0;
 
@@ -46,7 +41,7 @@ public class ViewPodcast extends Activity implements ParrotTTSObserver {
 
 		setContentView(R.layout.view_podcast);
 
-		showList = (ListView) findViewById(R.id.view_podcast_list_shows);
+		showList = getListView();
 		titleTextView = (TextView) findViewById(R.id.view_podcast_title);
 		progBar = (ProgressBar) findViewById(R.id.view_podcast_progress);
 
@@ -55,40 +50,34 @@ public class ViewPodcast extends Activity implements ParrotTTSObserver {
 		podcastDb = new PuddleDbAdapter(this);
 		podcastDb.open();
 
-		mTTSPlayer = new ParrotTTSPlayer(this, this);
 
 		Intent intent = getIntent();
 		podcastId = intent.getLongExtra("podcast", -1);
 
 		fillData();
 		updatePodcast();
+	}
+	
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		viewShow(id);
+	}
 
-		showList.setOnItemClickListener(new OnItemClickListener() {
+	@Override
+	public void onItemSelected(AdapterView<?> adapterView, View view,
+			int pos, long id) {
+		try {
+			Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
+			mTTSPlayer.play(c.getString(c
+					.getColumnIndex(PuddleDbAdapter.SHOW_TITLE)));
+		} catch (Exception ex) {
+			Log.e(TAG, ex.toString());
+		}
+	}
 
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int pos, long id) {
-				viewShow(id);
-			}
-		});
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
 
-		showList.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> adapterView, View view,
-					int pos, long id) {
-				try {
-					Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
-					mTTSPlayer.play(c.getString(c
-							.getColumnIndex(PuddleDbAdapter.SHOW_TITLE)));
-				} catch (Exception ex) {
-					Log.e(TAG, ex.toString());
-				}
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-
-			}
-		});
 	}
 
 	protected void viewShow(long id) {
