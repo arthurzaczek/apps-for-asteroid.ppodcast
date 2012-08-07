@@ -20,8 +20,8 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-public class ListPodcasts extends AbstractListActivity implements OnItemSelectedListener {
-	private static final String TAG = ListPodcasts.class.getName();
+public class Main extends AbstractListActivity implements OnItemSelectedListener {
+	private static final String TAG = Main.class.getName();
 
 	private static final int ACTIVITY_VIEW_PODCAST = 0;
 	private static final int DLG_WAIT = 1;
@@ -35,7 +35,7 @@ public class ListPodcasts extends AbstractListActivity implements OnItemSelected
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(TAG, "Setting up List Podcasts activity");
+		Log.d(TAG, "Setting up Main activity");
 
 		getListView().setOnItemSelectedListener(this);
 
@@ -76,10 +76,10 @@ public class ListPodcasts extends AbstractListActivity implements OnItemSelected
 		Cursor podcastsCursor = podcastDb.fetchAllPodcasts();
 		startManagingCursor(podcastsCursor);
 
-		String[] from = new String[] { PuddleDbAdapter.PODCAST_TITLE, PuddleDbAdapter.PODCAST_LAST_CHECKED, PuddleDbAdapter.PODCAST_LATEST_SHOW_TITLE };
-		int[] to = new int[] { R.id.list_podcasts_row_title, R.id.list_podcasts_row_last_checked, R.id.list_podcasts_row_latest_show };
+		String[] from = new String[] { PuddleDbAdapter.PODCAST_TITLE };
+		int[] to = new int[] { android.R.id.text1 };
 
-		SimpleCursorAdapter podcastsAdapter = new SimpleCursorAdapter(this, R.layout.list_podcasts_row, podcastsCursor, from, to);
+		SimpleCursorAdapter podcastsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, podcastsCursor, from, to);
 		setListAdapter(podcastsAdapter);
 	}
 	
