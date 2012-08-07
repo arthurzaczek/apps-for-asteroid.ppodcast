@@ -65,7 +65,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ViewShowAndStayAwake");
-
+		
 		setContentView(R.layout.view_show);
 
 		podcastDb = new PuddleDbAdapter(this);
@@ -83,6 +83,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		lastPosition = 0;
 		am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 		initPlayer();
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		progBar.setProgress(0);
 		fillData();
