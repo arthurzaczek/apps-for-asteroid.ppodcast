@@ -1,17 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<LinearLayout android:orientation="horizontal"
-		android:layout_height="wrap_content" android:layout_width="fill_parent">
-		<TextView android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <!-- header -->
+    <LinearLayout 
+    android:id="@+id/header" 
+    android:orientation="horizontal" 
+    android:layout_width="fill_parent"
+    android:background="@drawable/toptitlebar3"
+    android:layout_height="@dimen/config_row_size">
+		<ImageView 
+	        android:id="@+id/image_header" 
+	        android:layout_width="wrap_content" 
+	        android:layout_height="wrap_content" 
+	        android:src="@drawable/logo" 
+	        android:layout_marginLeft="@dimen/config_picto_ListScreen_notif_left_margin">
+        </ImageView>
+        
+        <TextView 
+	        android:text="podcast" 
+	        android:id="@+id/text_header" 
+	        android:layout_width="0sp" 
+	        android:layout_height="wrap_content"
+	        android:typeface="normal"
+			android:gravity="center_vertical"
+			android:layout_gravity="center_vertical"
 			android:layout_weight="1"
-			android:layout_width="0sp" android:text="View Podcast"
-			android:padding="5sp" android:textStyle="bold" android:id="@+id/view_podcast_title"
-			android:textSize="24sp"></TextView>
+			android:singleLine="true"
+			android:textColor="@color/plainWhite"
+			android:textSize="@dimen/config_text_ListScreen_title_size"
+			android:scrollHorizontally="true" 
+			android:layout_marginRight="@dimen/config_row_ListScreen_title_left_and_right_margin" 
+			android:layout_marginLeft="@dimen/config_row_ListScreen_title_left_and_right_margin">
+		</TextView>
 		<ProgressBar android:id="@+id/view_podcast_progress" 
-				android:layout_width="40sp" android:layout_height="40sp"/>
+				android:layout_width="@dimen/config_row_size" 
+				android:layout_height="@dimen/config_row_size"/>
 	</LinearLayout>
+	<!-- The divider -->
+	<ImageView
+		android:id="@+id/menu_header_divider"
+		android:layout_width="fill_parent"
+		android:layout_height="@dimen/config_divider_size"
+		android:background="@color/divider"		
+		/>
 	<ListView android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:id="@id/android:list"></ListView>
 </LinearLayout>

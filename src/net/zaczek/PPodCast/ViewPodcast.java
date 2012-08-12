@@ -42,7 +42,7 @@ public class ViewPodcast extends AbstractListActivity implements OnItemSelectedL
 		setContentView(R.layout.view_podcast);
 
 		showList = getListView();
-		titleTextView = (TextView) findViewById(R.id.view_podcast_title);
+		titleTextView = (TextView) findViewById(R.id.text_header);
 		progBar = (ProgressBar) findViewById(R.id.view_podcast_progress);
 		getListView().setOnItemSelectedListener(this);
 
@@ -100,13 +100,11 @@ public class ViewPodcast extends AbstractListActivity implements OnItemSelectedL
 		Cursor showsCursor = podcastDb.fetchAllShowsForPodcast(podcastId);
 		startManagingCursor(showsCursor);
 
-		String[] from = new String[] { PuddleDbAdapter.SHOW_TITLE,
-				PuddleDbAdapter.SHOW_DATE };
-		int[] to = new int[] { R.id.list_show_row_title,
-				R.id.list_show_row_date };
+		String[] from = new String[] { PuddleDbAdapter.SHOW_TITLE };
+		int[] to = new int[] { android.R.id.text1 };
 
 		SimpleCursorAdapter showsAdapter = new SimpleCursorAdapter(this,
-				R.layout.list_show_row, showsCursor, from, to);
+				android.R.layout.simple_list_item_1, showsCursor, from, to);
 
 		showList.setAdapter(showsAdapter);
 	}

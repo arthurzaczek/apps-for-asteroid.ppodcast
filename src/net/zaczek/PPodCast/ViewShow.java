@@ -74,7 +74,7 @@ public class ViewShow extends Activity implements OnErrorListener, OnBufferingUp
 		Intent intent = getIntent();
 		show = intent.getLongExtra("show", -1);
 
-		showTitle = (TextView) findViewById(R.id.ViewShowTitle);
+		showTitle = (TextView) findViewById(R.id.text_header);
 		showDescription = (TextView) findViewById(R.id.ViewShowDescription);
 		showStatus = (TextView) findViewById(R.id.ViewShowStatus);
 		showStatusCurrent = (TextView) findViewById(R.id.ViewShowStatusCurrent);
