@@ -134,6 +134,7 @@ public class Main extends AbstractListActivity implements OnItemSelectedListener
 			try {
 				PodcastUtil.syncPodcasts(podcastDb);
 			} catch (Exception ex) {
+				Log.e(TAG, "could not sync podcasts", ex);
 				msg = ex.toString();
 			}
 			return null;
