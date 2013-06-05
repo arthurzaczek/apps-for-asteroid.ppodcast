@@ -1,5 +1,7 @@
 package net.zaczek.PPodCast;
 
+import com.parrot.asteroid.tts.TTSManager;
+
 import net.zaczek.PPodCast.data.PuddleDbAdapter;
 import net.zaczek.PPodCast.util.PodcastUtil;
 
@@ -53,8 +55,10 @@ public class Main extends AbstractListActivity implements OnItemSelectedListener
 			int pos, long id) {
 		try {
 			Cursor c = (Cursor) adapterView.getAdapter().getItem(pos);
-			mTTSPlayer.play(c.getString(c
-					.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE)));
+			mTTS.speak(c.getString(c
+					.getColumnIndex(PuddleDbAdapter.PODCAST_TITLE)),
+					TTSManager.QUEUE_FLUSH,
+					null);
 		} catch (Exception ex) {
 			Log.e(TAG, ex.toString());
 		}
